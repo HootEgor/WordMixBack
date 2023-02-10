@@ -1,5 +1,8 @@
 # WordMixBack
 
+End points:
+
+
 POST login
 POST register
 POST newUserScore
