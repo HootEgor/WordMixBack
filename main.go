@@ -3,59 +3,52 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"os"
 )
 
-type config struct {
-	port int
+type Article struct {
+	Title   string `json:"Title"`
+	Desc    string `json:"Desc"`
+	Content string `json:"Content"`
 }
 
-type application struct {
-	config   config
-	infoLog  *log.Logger
-	errorLog *log.Logger
+type Articles []Article
+
+func allArticles(w http.ResponseWriter, r *http.Request) {
+	articles := Articles{
+		Article{Title: "Test Title", Desc: "Test DEsc", Content: "Hello"},
+	}
+
+	fmt.Println("All Articles endpoint")
+	json.NewEncoder(w).Encode(articles)
+}
+
+func postArticles(w http.ResponseWriter, r *http.Request) {
+	var article Article
+
+	err := json.NewDecoder(r.Body).Decode(&article)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	fmt.Fprintf(w, "%+v", article.Title)
+}
+
+func homePage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Home page")
+}
+
+func handleRequest() {
+	myRouter := mux.NewRouter().StrictSlash(true)
+	myRouter.HandleFunc("/", homePage).Methods("GET")
+	myRouter.HandleFunc("/articles", allArticles).Methods("GET")
+	myRouter.HandleFunc("/articles", postArticles).Methods("POST")
+	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
 func main() {
-	var cfg config
-	cfg.port = 8080
-
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-
-	app := &application{
-		config:   cfg,
-		infoLog:  infoLog,
-		errorLog: errorLog,
-	}
-
-	err := app.serve()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (app *application) serve() error {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var payLoad struct {
-			Okay    bool   `json:"okay"`
-			Message string `json:"message"`
-		}
-		payLoad.Okay = true
-		payLoad.Message = "Hello, world"
-
-		out, err := json.MarshalIndent(payLoad, "", "\t")
-		if err != nil {
-			app.errorLog.Println(err)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(out)
-	})
-
-	app.infoLog.Println("API listening on port", app.config.port)
-	return http.ListenAndServe(fmt.Sprintf(":%d", app.config.port), nil)
+	handleRequest()
 }
