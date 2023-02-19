@@ -1,1 +1,1 @@
-web: ./main
+web: ./WordMixBack.exe
