@@ -1,1 +1,1 @@
-web: ./src/main
+web: ./src/main.go
