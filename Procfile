@@ -1,1 +1,1 @@
-web: ./WordMixBack
+web: ./main
