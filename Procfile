@@ -1,1 +1,1 @@
-web: ./src/src.exe
+web: ./src/main
