@@ -19,8 +19,6 @@ POST register
 
 POST newUserScore
 
-PUT updateUserScore
-
 GET getUserInfo
 
 GET getLeadersByLanguage
