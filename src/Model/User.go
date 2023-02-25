@@ -3,7 +3,6 @@ package Models
 type User struct {
 	Login    string `firestore:"Login"`
 	Password string `firestore:"Password"`
-	Language int64  `firestore:"Language"`
 }
 
 //func GetUserByID(id int) (User, error) {

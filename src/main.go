@@ -14,7 +14,7 @@ import (
 func handleRequest(client *firestore.Client) {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/{id}", Handlers.GetUserInfo(client)).Methods("GET")
-	//myRouter.HandleFunc("/leaders", Handlers.GetLeadersByRegion).Methods("GET")
+	myRouter.HandleFunc("/leaders/{id}", Handlers.GetLeaders(client)).Methods("GET")
 	myRouter.HandleFunc("/auth/register", Handlers.Register(client)).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
