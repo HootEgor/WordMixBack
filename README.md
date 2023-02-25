@@ -19,7 +19,7 @@ POST register
 
 POST newUserScore
 
-PUT updateUserScore
+PUT updateUserLanguage
 
 GET getUserInfo
 
