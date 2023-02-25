@@ -15,7 +15,13 @@ func GetUserInfo(client *firestore.Client) http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		fmt.Fprintf(w, "%+v", user)
+
+		userJson, err := ParseUserToJSON(user)
+		if err != nil {
+			return
+		}
+
+		fmt.Fprintf(w, "%+v", userJson)
 	}
 
 }
