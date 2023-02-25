@@ -25,7 +25,3 @@ func GetUserInfo(client *firestore.Client) http.HandlerFunc {
 	}
 
 }
-
-//func GetLeadersByRegion(w http.ResponseWriter, r *http.Request) {
-//	fmt.Fprintf(w, "%+v", Models.Users)
-//}

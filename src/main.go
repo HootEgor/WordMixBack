@@ -16,6 +16,7 @@ func handleRequest(client *firestore.Client) {
 	myRouter.HandleFunc("/{id}", Handlers.GetUserInfo(client)).Methods("GET")
 	//myRouter.HandleFunc("/leaders", Handlers.GetLeadersByRegion).Methods("GET")
 	myRouter.HandleFunc("/auth/register", Handlers.Register(client)).Methods("POST")
+	myRouter.HandleFunc("/login", Handlers.Login(client)).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
