@@ -1,17 +1,14 @@
 package Handlers
 
 import (
-	Models "WordMixBack/src/Model"
 	"encoding/json"
 )
 
-func ParseUserToJSON(user Models.User) (string, error) {
-	jsonData, err := json.Marshal(user)
+func ParseToJSON(data interface{}) (string, error) {
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return "", err
 	}
-
 	jsonString := string(jsonData)
-
 	return jsonString, nil
 }

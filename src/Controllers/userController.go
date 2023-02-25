@@ -16,12 +16,26 @@ func GetUserInfo(client *firestore.Client) http.HandlerFunc {
 			return
 		}
 
-		userJson, err := ParseUserToJSON(user)
+		userJson, err := ParseToJSON(user)
 		if err != nil {
 			return
 		}
 
 		fmt.Fprintf(w, "%+v", userJson)
 	}
+}
 
+func GetLeaders(client *firestore.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		scores, err := Services.GetLeaders(client)
+		if err != nil {
+			return
+		}
+
+		scoresJson, err := ParseToJSON(scores)
+		if err != nil {
+			return
+		}
+		fmt.Fprintf(w, "%+v", scoresJson)
+	}
 }
