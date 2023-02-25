@@ -3,7 +3,6 @@ package Handlers
 import (
 	"WordMixBack/src/Services"
 	"cloud.google.com/go/firestore"
-	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -17,7 +16,7 @@ func GetUserInfo(client *firestore.Client) http.HandlerFunc {
 			return
 		}
 
-		userJson, err := ParseUserToJSON(user)
+		userJson, err := ParseToJSON(user)
 		if err != nil {
 			return
 		}
@@ -32,12 +31,11 @@ func GetLeaders(client *firestore.Client) http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		if err := json.NewEncoder(w).Encode(scores); err != nil {
+
+		scoresJson, err := ParseToJSON(scores)
+		if err != nil {
 			return
 		}
+		fmt.Fprintf(w, "%+v", scoresJson)
 	}
 }
-
-//func GetLeadersByRegion(w http.ResponseWriter, r *http.Request) {
-//	fmt.Fprintf(w, "%+v", Models.Users)
-//}
