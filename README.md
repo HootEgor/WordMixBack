@@ -21,9 +21,9 @@ POST newUserScore
 
 GET getUserInfo
 
-GET getLeadersByLanguage
+GET getLeaders
 
-GET getUserScoreByLanguage
+GET getUserHistory
 
 Проект буде реалізовано у вигляді мобільного застосунку з допомогою мови Kotlin, серверна частина мовою Golang та база даних буде хоститися в хмарному середовищі.
 
