@@ -9,26 +9,26 @@ import (
 	"sort"
 )
 
-func AddNewUser(client *firestore.Client, user Models.User) error {
+func AddNewUser(client *firestore.Client, user Models.User) (string, error) {
 	ctx := context.Background()
-	_, _, err := client.Collection("Users").Add(ctx, user)
+	userRef, _, err := client.Collection("Users").Add(ctx, user)
 
 	if err != nil {
 		log.Fatalf("Failed adding alovelace: %v", err)
-		return err
+		return "", err
 	}
 
-	return nil
+	return userRef.ID, nil
 }
 
-func LoginUser(client *firestore.Client, user Models.User) ([]Models.User, error) {
+func LoginUser(client *firestore.Client, user Models.User) (string, error) {
 	ctx := context.Background()
 
 	collection := client.Collection("Users")
 
 	query := collection.Where("Login", "==", user.Login).Where("Password", "==", user.Password)
 
-	var users []Models.User
+	userID := ""
 	iter := query.Documents(ctx)
 	defer iter.Stop()
 	for {
@@ -37,23 +37,14 @@ func LoginUser(client *firestore.Client, user Models.User) ([]Models.User, error
 			break
 		}
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
-		// Convert the Firestore document to a User struct
-		var user Models.User
-		err = doc.DataTo(&user)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, user)
+		userID = doc.Ref.ID
+		break
 	}
 
-	if len(users) != 1 {
-		return nil, nil
-	}
-
-	return users, nil
+	return userID, nil
 }
 
 func GetUserInfo(client *firestore.Client, id string) (Models.User, error) {

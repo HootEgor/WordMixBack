@@ -19,12 +19,12 @@ func Register(client *firestore.Client) http.HandlerFunc {
 			return
 		}
 
-		err = Services.AddNewUser(client, newUser)
+		userID, err := Services.AddNewUser(client, newUser)
 		if err != nil {
 			return
 		}
 
-		token, err := GenerateJWT(newUser)
+		token, err := GenerateJWT(userID)
 		if err != nil {
 			return
 		}
@@ -41,13 +41,13 @@ func Login(client *firestore.Client) http.HandlerFunc {
 			return
 		}
 
-		user, err := Services.LoginUser(client, newUser)
-		if err != nil || user == nil {
+		userID, err := Services.LoginUser(client, newUser)
+		if err != nil || userID == "" {
 			http.Error(w, "user not found", 404)
 			return
 		}
 
-		token, err := GenerateJWT(user[0])
+		token, err := GenerateJWT(userID)
 		if err != nil {
 			return
 		}
@@ -56,11 +56,10 @@ func Login(client *firestore.Client) http.HandlerFunc {
 	}
 }
 
-func GenerateJWT(user Models.User) (string, error) {
+func GenerateJWT(userID string) (string, error) {
 
 	claims := jwt.MapClaims{}
-	claims["login"] = user.Login
-	claims["password"] = user.Password
+	claims["UserID"] = userID
 	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
