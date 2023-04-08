@@ -3,7 +3,6 @@ package Handlers
 import (
 	Models "WordMixBack/src/Model"
 	"WordMixBack/src/Services"
-	"cloud.google.com/go/firestore"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -11,49 +10,45 @@ import (
 	"time"
 )
 
-func Register(client *firestore.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var newUser Models.User
-		err := json.NewDecoder(r.Body).Decode(&newUser)
-		if err != nil {
-			return
-		}
-
-		userID, err := Services.AddNewUser(client, newUser)
-		if err != nil {
-			return
-		}
-
-		token, err := GenerateJWT(userID)
-		if err != nil {
-			return
-		}
-
-		fmt.Fprintf(w, "%+v", token)
+func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+	var newUser Models.User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+	if err != nil {
+		return
 	}
+
+	userID, err := Services.AddNewUser(h.Client, newUser)
+	if err != nil {
+		return
+	}
+
+	token, err := GenerateJWT(userID)
+	if err != nil {
+		return
+	}
+
+	fmt.Fprintf(w, "%+v", token)
 }
 
-func Login(client *firestore.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var newUser Models.User
-		err := json.NewDecoder(r.Body).Decode(&newUser)
-		if err != nil {
-			return
-		}
-
-		userID, err := Services.LoginUser(client, newUser)
-		if err != nil || userID == "" {
-			http.Error(w, "user not found", 404)
-			return
-		}
-
-		token, err := GenerateJWT(userID)
-		if err != nil {
-			return
-		}
-
-		fmt.Fprintf(w, "%+v", token)
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
+	var newUser Models.User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+	if err != nil {
+		return
 	}
+
+	userID, err := Services.LoginUser(h.Client, newUser)
+	if err != nil || userID == "" {
+		http.Error(w, "user not found", 404)
+		return
+	}
+
+	token, err := GenerateJWT(userID)
+	if err != nil {
+		return
+	}
+
+	fmt.Fprintf(w, "%+v", token)
 }
 
 func GenerateJWT(userID string) (string, error) {

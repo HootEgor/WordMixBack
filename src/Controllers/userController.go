@@ -10,67 +10,63 @@ import (
 	"net/http"
 )
 
-func GetUserInfo(client *firestore.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := mux.Vars(r)["id"]
-		user, err := Services.GetUserInfo(client, id)
-		if err != nil {
-			return
-		}
-
-		userJson, err := ParseToJSON(user)
-		if err != nil {
-			return
-		}
-
-		fmt.Fprintf(w, "%+v", userJson)
-	}
+type Handler struct {
+	Client *firestore.Client
 }
 
-func NewUserScore(client *firestore.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var newScore Models.Score
-		err := json.NewDecoder(r.Body).Decode(&newScore)
-		if err != nil {
-			return
-		}
-
-		err = Services.NewUserScore(client, newScore)
-		if err != nil {
-			return
-		}
-
-		fmt.Fprintf(w, "%+v", newScore)
+func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	user, err := Services.GetUserInfo(h.Client, id)
+	if err != nil {
+		return
 	}
+
+	userJson, err := ParseToJSON(user)
+	if err != nil {
+		return
+	}
+
+	fmt.Fprintf(w, "%+v", userJson)
 }
 
-func GetLeaders(client *firestore.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		scores, err := Services.GetLeaders(client)
-		if err != nil {
-			return
-		}
-
-		scoresJson, err := ParseToJSON(scores)
-		if err != nil {
-			return
-		}
-		fmt.Fprintf(w, "%+v", scoresJson)
+func (h *Handler) NewUserScore(w http.ResponseWriter, r *http.Request) {
+	var newScore Models.Score
+	err := json.NewDecoder(r.Body).Decode(&newScore)
+	if err != nil {
+		return
 	}
+
+	err = Services.NewUserScore(h.Client, newScore)
+	if err != nil {
+		return
+	}
+
+	fmt.Fprintf(w, "%+v", newScore)
 }
 
-func GetUserHistory(client *firestore.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := mux.Vars(r)["id"]
-		scores, err := Services.GetUserHistory(client, id)
-		if err != nil {
-			return
-		}
-
-		scoresJson, err := ParseToJSON(scores)
-		if err != nil {
-			return
-		}
-		fmt.Fprintf(w, "%+v", scoresJson)
+func (h *Handler) GetLeaders(w http.ResponseWriter, r *http.Request) {
+	scores, err := Services.GetLeaders(h.Client)
+	if err != nil {
+		return
 	}
+
+	scoresJson, err := ParseToJSON(scores)
+	if err != nil {
+		return
+	}
+	fmt.Fprintf(w, "%+v", scoresJson)
+}
+
+func (h *Handler) GetUserHistory(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	scores, err := Services.GetUserHistory(h.Client, id)
+	if err != nil {
+		return
+	}
+
+	scoresJson, err := ParseToJSON(scores)
+	if err != nil {
+		return
+	}
+	fmt.Fprintf(w, "%+v", scoresJson)
 }
