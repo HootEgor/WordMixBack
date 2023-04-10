@@ -10,7 +10,12 @@ import (
 )
 
 type Service interface {
-	GetUser() (user Models.User, err error)
+	AddNewUser(client *firestore.Client, user Models.User) (string, error)
+	LoginUser(client *firestore.Client, user Models.User) (string, error)
+	GetUserInfo(client *firestore.Client, id string) (Models.User, error)
+	GetLeaders(client *firestore.Client) ([]Models.Score, error)
+	GetUserHistory(client *firestore.Client, id string) ([]Models.Score, error)
+	NewUserScore(client *firestore.Client, score Models.Score) error
 }
 
 type handler struct {
