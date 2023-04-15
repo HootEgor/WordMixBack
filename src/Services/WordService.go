@@ -7,7 +7,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func AddNewWords(client *firestore.Client, words []Models.Word) error {
+func AddNewWords(client *firestore.Client, words []Models.Word) ([]Models.Word, error) {
+	var addedWords []Models.Word
 	ctx := context.Background()
 	for _, word := range words {
 		query := client.Collection("Words").Where("Word", "==", word.Word).Limit(1)
@@ -19,11 +20,12 @@ func AddNewWords(client *firestore.Client, words []Models.Word) error {
 		if len(docSnap) == 0 {
 			_, _, err = client.Collection("Words").Add(ctx, word)
 			if err != nil {
-				return err
+				return nil, err
 			}
+			addedWords = append(addedWords, word)
 		}
 	}
-	return nil
+	return addedWords, nil
 }
 
 func GetWords(client *firestore.Client) ([]Models.Word, error) {

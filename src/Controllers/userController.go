@@ -10,8 +10,20 @@ import (
 	"net/http"
 )
 
+type Service interface {
+	GetUserInfo(client *firestore.Client, id string) (Models.User, error)
+}
+
 type Handler struct {
-	Client *firestore.Client
+	service Service
+	Client  *firestore.Client
+}
+
+func NewHandler(service Service, client *firestore.Client) *Handler {
+	return &Handler{
+		service: service,
+		Client:  client,
+	}
 }
 
 func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {

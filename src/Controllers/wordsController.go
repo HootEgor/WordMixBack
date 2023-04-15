@@ -10,12 +10,13 @@ import (
 
 func (h *Handler) AddNewWords(w http.ResponseWriter, r *http.Request) {
 	var newWords []Models.Word
+
 	err := json.NewDecoder(r.Body).Decode(&newWords)
 	if err != nil {
 		return
 	}
 
-	err = Services.AddNewWords(h.Client, newWords)
+	newWords, err = Services.AddNewWords(h.Client, newWords)
 	if err != nil {
 		return
 	}
