@@ -15,15 +15,8 @@ type Service interface {
 }
 
 type Handler struct {
-	service Service
+	Service Service
 	Client  *firestore.Client
-}
-
-func NewHandler(service Service, client *firestore.Client) *Handler {
-	return &Handler{
-		service: service,
-		Client:  client,
-	}
 }
 
 func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +31,11 @@ func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", userJson)
+	fprintf, err := fmt.Fprintf(w, "%+v", userJson)
+	if err != nil {
+		fmt.Errorf("rr.Body.String(): %v", fprintf)
+		return
+	}
 }
 
 func (h *Handler) NewUserScore(w http.ResponseWriter, r *http.Request) {

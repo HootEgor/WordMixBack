@@ -18,15 +18,9 @@ type Service interface {
 	NewUserScore(client *firestore.Client, score Models.Score) error
 }
 
-type handler struct {
-	service Service
-}
-
 func AddNewUser(client *firestore.Client, user Models.User) (string, error) {
 	ctx := context.Background()
 	userRef, _, err := client.Collection("Users").Add(ctx, user)
-	//var handler handler
-	//userRef, err := handler.service.GetUser()
 
 	if err != nil {
 		log.Fatalf("Failed adding alovelace: %v", err)
