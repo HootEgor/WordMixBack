@@ -2,26 +2,25 @@ package Handlers
 
 import (
 	Models "WordMixBack/src/Model"
-	"WordMixBack/src/Services"
-	"cloud.google.com/go/firestore"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-type Service interface {
-	GetUserInfo(client *firestore.Client, id string) (Models.User, error)
+type UserService interface {
+	AddNewUser(ctx context.Context, user Models.User) (string, error)
+	LoginUser(ctx context.Context, user Models.User) (string, error)
+	GetUserInfo(ctx context.Context, id string) (Models.User, error)
+	GetLeaders(ctx context.Context) ([]Models.Score, error)
+	GetUserHistory(ctx context.Context, id string) ([]Models.Score, error)
+	NewUserScore(ctx context.Context, score Models.Score) error
 }
 
-type Handler struct {
-	Service Service
-	Client  *firestore.Client
-}
-
-func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
+func (h *HttpHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	user, err := Services.GetUserInfo(h.Client, id)
+	user, err := h.userService.GetUserInfo(r.Context(), id)
 	if err != nil {
 		return
 	}
@@ -38,14 +37,14 @@ func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) NewUserScore(w http.ResponseWriter, r *http.Request) {
+func (h *HttpHandler) NewUserScore(w http.ResponseWriter, r *http.Request) {
 	var newScore Models.Score
 	err := json.NewDecoder(r.Body).Decode(&newScore)
 	if err != nil {
 		return
 	}
 
-	err = Services.NewUserScore(h.Client, newScore)
+	err = h.userService.NewUserScore(r.Context(), newScore)
 	if err != nil {
 		return
 	}
@@ -53,8 +52,8 @@ func (h *Handler) NewUserScore(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%+v", newScore)
 }
 
-func (h *Handler) GetLeaders(w http.ResponseWriter, r *http.Request) {
-	scores, err := Services.GetLeaders(h.Client)
+func (h *HttpHandler) GetLeaders(w http.ResponseWriter, r *http.Request) {
+	scores, err := h.userService.GetLeaders(r.Context())
 	if err != nil {
 		return
 	}
@@ -66,9 +65,9 @@ func (h *Handler) GetLeaders(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%+v", scoresJson)
 }
 
-func (h *Handler) GetUserHistory(w http.ResponseWriter, r *http.Request) {
+func (h *HttpHandler) GetUserHistory(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	scores, err := Services.GetUserHistory(h.Client, id)
+	scores, err := h.userService.GetUserHistory(r.Context(), id)
 	if err != nil {
 		return
 	}

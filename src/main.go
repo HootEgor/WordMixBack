@@ -2,6 +2,8 @@ package main
 
 import (
 	Handlers "WordMixBack/src/Controllers"
+	"WordMixBack/src/Repositories"
+	"WordMixBack/src/Services"
 	"context"
 	firebase "firebase.google.com/go"
 	"github.com/gorilla/mux"
@@ -25,9 +27,10 @@ func main() {
 	}
 	defer client.Close()
 
-	handlers := Handlers.Handler{
-		Client: client,
-	}
+	repository := Repositories.NewRepository(client)
+	userService := Services.NewUserService(repository, repository)
+	wordService := Services.NewWordService(repository)
+	handlers := Handlers.NewHttpHandler(userService, wordService)
 
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/score/leaders", handlers.GetLeaders).Methods("GET")

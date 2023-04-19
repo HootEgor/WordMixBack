@@ -2,7 +2,6 @@ package Handlers
 
 import (
 	Models "WordMixBack/src/Model"
-	"WordMixBack/src/Services"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -10,14 +9,26 @@ import (
 	"time"
 )
 
-func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+type HttpHandler struct {
+	userService UserService
+	wordService WordService
+}
+
+func NewHttpHandler(userService UserService, wordService WordService) *HttpHandler {
+	return &HttpHandler{
+		userService: userService,
+		wordService: wordService,
+	}
+}
+
+func (h *HttpHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var newUser Models.User
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
 		return
 	}
 
-	userID, err := Services.AddNewUser(h.Client, newUser)
+	userID, err := h.userService.AddNewUser(r.Context(), newUser)
 	if err != nil {
 		return
 	}
@@ -30,14 +41,14 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%+v", token)
 }
 
-func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
+func (h *HttpHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var newUser Models.User
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
 		return
 	}
 
-	userID, err := Services.LoginUser(h.Client, newUser)
+	userID, err := h.userService.LoginUser(r.Context(), newUser)
 	if err != nil || userID == "" {
 		http.Error(w, "user not found", 404)
 		return

@@ -2,13 +2,18 @@ package Handlers
 
 import (
 	Models "WordMixBack/src/Model"
-	"WordMixBack/src/Services"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
-func (h *Handler) AddNewWords(w http.ResponseWriter, r *http.Request) {
+type WordService interface {
+	AddNewWords(ctx context.Context, words []Models.Word) ([]Models.Word, error)
+	GetWords(ctx context.Context) ([]Models.Word, error)
+}
+
+func (h *HttpHandler) AddNewWords(w http.ResponseWriter, r *http.Request) {
 	var newWords []Models.Word
 
 	err := json.NewDecoder(r.Body).Decode(&newWords)
@@ -16,7 +21,7 @@ func (h *Handler) AddNewWords(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newWords, err = Services.AddNewWords(h.Client, newWords)
+	newWords, err = h.wordService.AddNewWords(r.Context(), newWords)
 	if err != nil {
 		return
 	}
@@ -24,8 +29,8 @@ func (h *Handler) AddNewWords(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%+v", newWords)
 }
 
-func (h *Handler) GetWords(w http.ResponseWriter, r *http.Request) {
-	words, err := Services.GetWords(h.Client)
+func (h *HttpHandler) GetWords(w http.ResponseWriter, r *http.Request) {
+	words, err := h.wordService.GetWords(r.Context())
 	if err != nil {
 		return
 	}
