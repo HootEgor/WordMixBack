@@ -6,11 +6,6 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-type WordRepository interface {
-	AddNewWords(ctx context.Context, words []Models.Word) ([]Models.Word, error)
-	GetWords(ctx context.Context) ([]Models.Word, error)
-}
-
 func (o *Repository) AddNewWords(ctx context.Context, words []Models.Word) ([]Models.Word, error) {
 	var addedWords []Models.Word
 	for _, word := range words {
