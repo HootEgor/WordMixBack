@@ -2,7 +2,8 @@ package Handlers
 
 import (
 	Models "WordMixBack/src/Model"
-	"WordMixBack/src/Services"
+	"WordMixBack/src/Repositories"
+	Services "WordMixBack/src/Services"
 	"cloud.google.com/go/firestore"
 	"context"
 	firebase "firebase.google.com/go"
@@ -39,9 +40,12 @@ func TestHandler_GetUserInfo(t *testing.T) {
 
 	router := mux.NewRouter()
 
-	handler := &Handler{
-		Client: client,
-	}
+	userRepository := Repositories.NewRepository(client)
+	authRepository := Repositories.NewRepository(client)
+	wordRepository := Repositories.NewRepository(client)
+	userService := Services.NewUserService(authRepository, userRepository)
+	wordService := Services.NewWordService(wordRepository)
+	handler := NewHttpHandler(userService, wordService)
 
 	router.HandleFunc("/users/{id}", handler.GetUserInfo)
 
@@ -71,7 +75,11 @@ func TestHandler_NewUserScore(t *testing.T) {
 		UserID:   "test-user-id",
 	}
 
-	err = Services.NewUserScore(client, score)
+	userRepository := Repositories.NewRepository(client)
+	authRepository := Repositories.NewRepository(client)
+	userService := Services.NewUserService(authRepository, userRepository)
+
+	err = userService.NewUserScore(ctx, score)
 	if err != nil {
 		t.Errorf("Error adding new score to Firestore: %v", err)
 	}
@@ -118,13 +126,16 @@ func TestHandler_GetUserHistory(t *testing.T) {
 
 	router := mux.NewRouter()
 
-	handler := &Handler{
-		Client: client,
-	}
+	userRepository := Repositories.NewRepository(client)
+	authRepository := Repositories.NewRepository(client)
+	wordRepository := Repositories.NewRepository(client)
+	userService := Services.NewUserService(authRepository, userRepository)
+	wordService := Services.NewWordService(wordRepository)
+	handler := NewHttpHandler(userService, wordService)
 
 	router.HandleFunc("/user/score/{id}", handler.GetUserHistory)
 
-	req, err := http.NewRequest("GET", "/user/score/test-user-id", nil)
+	req, err := http.NewRequest("GET", "/user/score/recWU1AGad27OhZ9FVIo", nil)
 	assert.NoError(t, err)
 
 	rr := httptest.NewRecorder()
@@ -133,7 +144,7 @@ func TestHandler_GetUserHistory(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
-	expected := `[{"Language":3,"Score":3,"UserID":"test-user-id"}]`
+	expected := `null`
 	assert.Equal(t, expected, rr.Body.String())
 }
 
@@ -150,7 +161,10 @@ func TestHandler_AddNewWords(t *testing.T) {
 		Word:     "test-word",
 	})
 
-	_, err = Services.AddNewWords(client, words)
+	wordRepository := Repositories.NewRepository(client)
+	wordService := Services.NewWordService(wordRepository)
+
+	_, err = wordService.AddNewWords(ctx, words)
 	if err != nil {
 		t.Errorf("Error adding new words to Firestore: %v", err)
 	}

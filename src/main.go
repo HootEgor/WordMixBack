@@ -27,9 +27,11 @@ func main() {
 	}
 	defer client.Close()
 
-	repository := Repositories.NewRepository(client)
-	userService := Services.NewUserService(repository, repository)
-	wordService := Services.NewWordService(repository)
+	userRepository := Repositories.NewRepository(client)
+	authRepository := Repositories.NewRepository(client)
+	wordRepository := Repositories.NewRepository(client)
+	userService := Services.NewUserService(authRepository, userRepository)
+	wordService := Services.NewWordService(wordRepository)
 	handlers := Handlers.NewHttpHandler(userService, wordService)
 
 	myRouter := mux.NewRouter().StrictSlash(true)
