@@ -2,6 +2,7 @@ package Handlers
 
 import (
 	Models "WordMixBack/src/Model"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -10,12 +11,19 @@ import (
 )
 
 type HttpHandler struct {
+	authService AuthService
 	userService UserService
 	wordService WordService
 }
 
-func NewHttpHandler(userService UserService, wordService WordService) *HttpHandler {
+type AuthService interface {
+	AddNewUser(ctx context.Context, user Models.User) (string, error)
+	LoginUser(ctx context.Context, user Models.User) (string, error)
+}
+
+func NewHttpHandler(userService UserService, wordService WordService, authService AuthService) *HttpHandler {
 	return &HttpHandler{
+		authService: authService,
 		userService: userService,
 		wordService: wordService,
 	}
@@ -28,7 +36,7 @@ func (h *HttpHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := h.userService.AddNewUser(r.Context(), newUser)
+	userID, err := h.authService.AddNewUser(r.Context(), newUser)
 	if err != nil {
 		return
 	}
@@ -48,7 +56,7 @@ func (h *HttpHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := h.userService.LoginUser(r.Context(), newUser)
+	userID, err := h.authService.LoginUser(r.Context(), newUser)
 	if err != nil || userID == "" {
 		http.Error(w, "user not found", 404)
 		return

@@ -1,4 +1,4 @@
-package Repositories
+package UserRepository
 
 import (
 	Models "WordMixBack/src/Model"
@@ -9,7 +9,15 @@ import (
 	"sort"
 )
 
-func (o *Repository) GetUserInfo(ctx context.Context, id string) (Models.User, error) {
+type UserRepository struct {
+	c *firestore.Client
+}
+
+func NewUserRepository(c *firestore.Client) *UserRepository {
+	return &UserRepository{c}
+}
+
+func (o *UserRepository) GetUserInfo(ctx context.Context, id string) (Models.User, error) {
 	dsnap, err := o.c.Collection("Users").Doc(id).Get(ctx)
 	newUser := Models.User{}
 	if err != nil {
@@ -22,7 +30,7 @@ func (o *Repository) GetUserInfo(ctx context.Context, id string) (Models.User, e
 	return newUser, nil
 }
 
-func (o *Repository) GetLeaders(ctx context.Context) ([]Models.Score, error) {
+func (o *UserRepository) GetLeaders(ctx context.Context) ([]Models.Score, error) {
 	var scores []Models.Score
 	iter := o.c.Collection("Score").OrderBy("Score", firestore.Desc).Documents(ctx)
 	for {
@@ -47,7 +55,7 @@ func (o *Repository) GetLeaders(ctx context.Context) ([]Models.Score, error) {
 	return scores, nil
 }
 
-func (o *Repository) GetUserHistory(ctx context.Context, id string) ([]Models.Score, error) {
+func (o *UserRepository) GetUserHistory(ctx context.Context, id string) ([]Models.Score, error) {
 	var scores []Models.Score
 	iter := o.c.Collection("Score").Where("UserID", "==", id).Documents(ctx)
 	for {
@@ -68,11 +76,42 @@ func (o *Repository) GetUserHistory(ctx context.Context, id string) ([]Models.Sc
 	return scores, nil
 }
 
-func (o *Repository) NewUserScore(ctx context.Context, score Models.Score) error {
+func (o *UserRepository) NewUserScore(ctx context.Context, score Models.Score) error {
 	_, _, err := o.c.Collection("Score").Add(ctx, score)
 	if err != nil {
 		log.Fatalf("Failed adding alovelace: %v", err)
 		return err
 	}
 	return nil
+}
+
+func (o *UserRepository) AddNewUser(ctx context.Context, user Models.User) (string, error) {
+	userRef, _, err := o.c.Collection("Users").Add(ctx, user)
+
+	if err != nil {
+		log.Fatalf("Failed adding alovelace: %v", err)
+		return "", err
+	}
+
+	return userRef.ID, nil
+}
+
+func (o *UserRepository) GetUserByInfo(ctx context.Context, user Models.User) (string, error) {
+	collection := o.c.Collection("Users")
+	query := collection.Where("Login", "==", user.Login).Where("Password", "==", user.Password)
+	userID := ""
+	iter := query.Documents(ctx)
+	defer iter.Stop()
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return "", err
+		}
+		userID = doc.Ref.ID
+		break
+	}
+	return userID, nil
 }

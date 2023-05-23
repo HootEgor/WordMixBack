@@ -1,12 +1,21 @@
-package Repositories
+package WordRepository
 
 import (
 	Models "WordMixBack/src/Model"
+	"cloud.google.com/go/firestore"
 	"context"
 	"google.golang.org/api/iterator"
 )
 
-func (o *Repository) AddNewWords(ctx context.Context, words []Models.Word) ([]Models.Word, error) {
+type WordRepository struct {
+	c *firestore.Client
+}
+
+func NewWordRepository(c *firestore.Client) *WordRepository {
+	return &WordRepository{c}
+}
+
+func (o *WordRepository) AddNewWords(ctx context.Context, words []Models.Word) ([]Models.Word, error) {
 	var addedWords []Models.Word
 	for _, word := range words {
 		query := o.c.Collection("Words").Where("Word", "==", word.Word).Limit(1)
@@ -26,7 +35,7 @@ func (o *Repository) AddNewWords(ctx context.Context, words []Models.Word) ([]Mo
 	return addedWords, nil
 }
 
-func (o *Repository) GetWords(ctx context.Context) ([]Models.Word, error) {
+func (o *WordRepository) GetWords(ctx context.Context) ([]Models.Word, error) {
 	var words []Models.Word
 	iter := o.c.Collection("Words").Documents(ctx)
 	defer iter.Stop()

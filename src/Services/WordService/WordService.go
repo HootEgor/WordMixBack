@@ -1,4 +1,4 @@
-package Services
+package WordService
 
 import (
 	Models "WordMixBack/src/Model"

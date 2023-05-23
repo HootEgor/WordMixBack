@@ -1,14 +1,9 @@
-package Services
+package UserService
 
 import (
 	Models "WordMixBack/src/Model"
 	"context"
 )
-
-type AuthRepository interface {
-	AddNewUser(ctx context.Context, user Models.User) (string, error)
-	GetUserByInfo(ctx context.Context, user Models.User) (string, error)
-}
 
 type UserRepository interface {
 	GetUserInfo(ctx context.Context, id string) (Models.User, error)
@@ -18,31 +13,15 @@ type UserRepository interface {
 }
 
 type UserService struct {
-	authRepository AuthRepository
 	userRepository UserRepository
 }
 
-func NewUserService(authRepository AuthRepository, userRepository UserRepository) *UserService {
+func NewUserService(userRepository UserRepository) *UserService {
 	return &UserService{
-		authRepository: authRepository,
 		userRepository: userRepository,
 	}
 }
 
-// AuthService
-func (s *UserService) AddNewUser(ctx context.Context, user Models.User) (string, error) {
-	return s.authRepository.AddNewUser(ctx, user)
-}
-
-func (s *UserService) LoginUser(ctx context.Context, user Models.User) (string, error) {
-	login, err := s.authRepository.GetUserByInfo(ctx, user)
-	if err != nil {
-		return "", err
-	}
-	return login, nil
-}
-
-// UserService
 func (s *UserService) GetUserInfo(ctx context.Context, id string) (Models.User, error) {
 	return s.userRepository.GetUserInfo(ctx, id)
 }

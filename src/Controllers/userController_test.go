@@ -2,8 +2,11 @@ package Handlers
 
 import (
 	Models "WordMixBack/src/Model"
-	"WordMixBack/src/Repositories"
-	Services "WordMixBack/src/Services"
+	"WordMixBack/src/Repositories/UserRepository"
+	"WordMixBack/src/Repositories/WordRepository"
+	AuthService2 "WordMixBack/src/Services/AuthService"
+	UserService2 "WordMixBack/src/Services/UserService"
+	WordService2 "WordMixBack/src/Services/WordService"
 	"cloud.google.com/go/firestore"
 	"context"
 	firebase "firebase.google.com/go"
@@ -40,12 +43,13 @@ func TestHandler_GetUserInfo(t *testing.T) {
 
 	router := mux.NewRouter()
 
-	userRepository := Repositories.NewRepository(client)
-	authRepository := Repositories.NewRepository(client)
-	wordRepository := Repositories.NewRepository(client)
-	userService := Services.NewUserService(authRepository, userRepository)
-	wordService := Services.NewWordService(wordRepository)
-	handler := NewHttpHandler(userService, wordService)
+	wordRepository := WordRepository.NewWordRepository(client)
+	authRepository := UserRepository.NewUserRepository(client)
+	userRepository := UserRepository.NewUserRepository(client)
+	authService := AuthService2.NewAuthService(authRepository)
+	userService := UserService2.NewUserService(userRepository)
+	wordService := WordService2.NewWordService(wordRepository)
+	handler := NewHttpHandler(userService, wordService, authService)
 
 	router.HandleFunc("/users/{id}", handler.GetUserInfo)
 
@@ -75,9 +79,8 @@ func TestHandler_NewUserScore(t *testing.T) {
 		UserID:   "test-user-id",
 	}
 
-	userRepository := Repositories.NewRepository(client)
-	authRepository := Repositories.NewRepository(client)
-	userService := Services.NewUserService(authRepository, userRepository)
+	userRepository := UserRepository.NewUserRepository(client)
+	userService := UserService2.NewUserService(userRepository)
 
 	err = userService.NewUserScore(ctx, score)
 	if err != nil {
@@ -126,12 +129,13 @@ func TestHandler_GetUserHistory(t *testing.T) {
 
 	router := mux.NewRouter()
 
-	userRepository := Repositories.NewRepository(client)
-	authRepository := Repositories.NewRepository(client)
-	wordRepository := Repositories.NewRepository(client)
-	userService := Services.NewUserService(authRepository, userRepository)
-	wordService := Services.NewWordService(wordRepository)
-	handler := NewHttpHandler(userService, wordService)
+	userRepository := UserRepository.NewUserRepository(client)
+	authRepository := UserRepository.NewUserRepository(client)
+	wordRepository := WordRepository.NewWordRepository(client)
+	authService := AuthService2.NewAuthService(authRepository)
+	userService := UserService2.NewUserService(userRepository)
+	wordService := WordService2.NewWordService(wordRepository)
+	handler := NewHttpHandler(userService, wordService, authService)
 
 	router.HandleFunc("/user/score/{id}", handler.GetUserHistory)
 
@@ -161,8 +165,8 @@ func TestHandler_AddNewWords(t *testing.T) {
 		Word:     "test-word",
 	})
 
-	wordRepository := Repositories.NewRepository(client)
-	wordService := Services.NewWordService(wordRepository)
+	wordRepository := WordRepository.NewWordRepository(client)
+	wordService := WordService2.NewWordService(wordRepository)
 
 	_, err = wordService.AddNewWords(ctx, words)
 	if err != nil {

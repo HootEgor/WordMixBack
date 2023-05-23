@@ -10,8 +10,6 @@ import (
 )
 
 type UserService interface {
-	AddNewUser(ctx context.Context, user Models.User) (string, error)
-	LoginUser(ctx context.Context, user Models.User) (string, error)
 	GetUserInfo(ctx context.Context, id string) (Models.User, error)
 	GetLeaders(ctx context.Context) ([]Models.Score, error)
 	GetUserHistory(ctx context.Context, id string) ([]Models.Score, error)
